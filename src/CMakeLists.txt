@@ -543,6 +543,7 @@ set(CFLAGS
     ${DEPS_CFLAGS}
     ${DEPS_CFLAGS_OTHER}
     -D_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\"
+    -D_BUILD_ROOT_DIR=\"${CMAKE_BINARY_DIR}\"
     -D_SOURCE_ROOT_DIR=\"${CMAKE_SOURCE_DIR}\"
     -D_GSETTINGS_DIR=\"${CMAKE_BINARY_DIR}/gsettings\"
     -DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"
@@ -617,7 +618,13 @@ OPTIONS
     ${VALAC_OPTIONS}
 )
 
+# Build the library statically so we can it statically, but make it
+# relocatable so we can link it to the web extension dynamic lib.
 add_library(geary-static STATIC ${ENGINE_VALA_C})
+set_property(
+  TARGET geary-static
+  PROPERTY POSITION_INDEPENDENT_CODE TRUE
+)
 add_dependencies(geary-static git-version)
 target_link_libraries(geary-static ${DEPS_LIBRARIES} sqlite3-unicodesn gthread-2.0)
 
@@ -669,15 +676,11 @@ OPTIONS
     ${VALAC_OPTIONS}
 )
 
-add_library(geary-web-process ${WEB_PROCESS_VALA_C})
-target_link_libraries(geary-web-process ${DEPS_LIBRARIES} gthread-2.0)
-add_custom_command(
-    TARGET
-        geary-web-process
-    POST_BUILD
-    COMMAND
-        ${CMAKE_COMMAND} -E copy geary-console ${CMAKE_BINARY_DIR}/
+add_library(geary-web-process MODULE ${WEB_PROCESS_VALA_C})
+target_link_libraries(geary-web-process
+  PRIVATE ${DEPS_LIBRARIES} gthread-2.0 geary-static
 )
+install(TARGETS geary-web-process LIBRARY DESTINATION lib/geary/web-extensions)
 
 # Console app
 #################################################
