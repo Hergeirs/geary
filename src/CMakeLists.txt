@@ -488,6 +488,7 @@ else ()
 endif ()
 
 set(TARGET_GLIB 2.42)
+set(TARGET_WEBKIT 2.10)
 
 pkg_check_modules(DEPS REQUIRED
     gthread-2.0
@@ -504,8 +505,8 @@ pkg_check_modules(DEPS REQUIRED
     libxml-2.0>=2.7.8
     gcr-3>=3.10.1
     gobject-introspection-1.0
-    webkit2gtk-4.0>=2.6
-    webkit2gtk-web-extension-4.0>=2.6
+    webkit2gtk-4.0>=${TARGET_WEBKIT}
+    webkit2gtk-web-extension-4.0>=${TARGET_WEBKIT}
     enchant>=1.6
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
